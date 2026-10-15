@@ -79,6 +79,7 @@
   .zinfo .zt { display: flex; align-items: center; gap: 10px; font-size: 17px; font-weight: 700; }
   .zinfo .zt span { font-size: 28px; }
   .zinfo p { margin: 6px 0 12px; color: var(--hint); }
+  .ask.report { background: var(--bg); margin-bottom: 12px; }
   .ask { width: 100%; border: 2px solid var(--accent); background: transparent; color: var(--accent); border-radius: 12px;
     padding: 12px; font: inherit; font-weight: 700; cursor: pointer; }
 
@@ -191,6 +192,7 @@
         <button class="ask" id="askBtn" data-t="ask"></button>
       </div>
     </div>
+    <button class="ask report" data-t="report"></button>
   </section>
 
   <!-- ===== 💳 Карта ===== -->
@@ -201,7 +203,7 @@
       <div class="bal"><small data-t="balance"></small><b id="cBal"></b></div>
       <div class="row">
         <div><div class="code" id="cCode"></div><div class="nm" id="cName"></div></div>
-        <div class="cb"><span data-t="cashback"></span><b id="cCb"></b></div>
+        <div class="cb"><span data-t="ordersCnt"></span><b id="cCb"></b></div>
       </div>
     </div>
     <div class="card">
@@ -216,8 +218,9 @@
     </div>
     <div class="card">
       <div class="stats" id="stats"></div>
-      <div class="hint" id="next" style="margin-top:10px"></div>
+      <div class="hint" data-t="cbHint" style="margin-top:10px"></div>
     </div>
+    <button class="ask report" data-t="report"></button>
   </section>
 
 
@@ -228,6 +231,10 @@
       <div id="orders"></div>
       <div class="hint" data-t="ordersHint" style="margin-top:8px"></div>
     </div>
+    <div class="card">
+      <h2 data-t="reportsTitle"></h2>
+      <div id="reports"></div>
+    </div>
   </section>
 </div>
 
@@ -237,10 +244,14 @@
 const T = {
   uz: {
     hello: "Salom, {n}!", tab_card: "💳 Kartam", tab_use: "🏠 Uy maketi", tab_mine: "📋 Buyurtmalar",
-    balance: "Kartadagi bonus", cashback: "Keshbek", sum: "so'm",
+    balance: "Kartadagi bonus", ordersCnt: "To'langan buyurtmalar", sum: "so'm",
+    report: "📸 Foto-hisobot yuborish — keshbek olish", reportsTitle: "📸 Foto-hisobotlarim",
+    noReports: "Hali foto-hisobot yo'q. Mahsulotimiz ishlatilgan obyekt rasmini lokatsiya bilan yuboring — keshbek oling.",
+    cbHint: "Har bir buyurtma va foto-hisobot uchun keshbekni menejer yozadi.",
+    rst: { new: "🕐 Tekshirilmoqda", paid: "✅ Qabul qilindi", cancelled: "❌ Qabul qilinmadi" },
     qrTitle: "Karta raqami va QR-kod", qrHint: "Buyurtma berishda menejerga shu kodni ko'rsating — buyurtma sizning tarixingizga va kartangizga yoziladi.",
     copy: "📋 Raqamni nusxalash", copied: "✅ Nusxalandi",
-    sLevel: "Daraja", sDisc: "Chegirma", s90: "90 kunda xarid", sAcc: "Jami hisoblangan",
+    sAcc: "Jami hisoblangan", sPaid: "Sizga to'langan",
     useTitle: "Uyning qayerini izolyatsiya qilamiz", useHint: "Raqamni yoki pastdagi tugmani bosing.",
     ask: "💬 Qo'shimcha ma'lumot uchun — menejer",
     ordersTitle: "📋 Buyurtmalarim", ordersHint: "Buyurtmalarni menejer kartangizga yozadi. Ro'yxat bot menyusi ochilganda yangilanadi.",
@@ -251,10 +262,14 @@ const T = {
   },
   ru: {
     hello: "Здравствуйте, {n}!", tab_card: "💳 Карта", tab_use: "🏠 Макет дома", tab_mine: "📋 Заказы",
-    balance: "Бонус на карте", cashback: "Кешбэк", sum: "сум",
+    balance: "Бонус на карте", ordersCnt: "Оплачено заказов", sum: "сум",
+    report: "📸 Отправить фотоотчёт — получить кешбэк", reportsTitle: "📸 Мои фотоотчёты",
+    noReports: "Фотоотчётов пока нет. Пришлите фото объекта с нашей продукцией и геолокацией — получите кешбэк.",
+    cbHint: "Кешбэк за каждый заказ и фотоотчёт начисляет менеджер.",
+    rst: { new: "🕐 На проверке", paid: "✅ Принят", cancelled: "❌ Не принят" },
     qrTitle: "Номер карты и QR-код", qrHint: "При заказе покажите этот код менеджеру — заказ попадёт в вашу историю и на карту.",
     copy: "📋 Скопировать номер", copied: "✅ Скопировано",
-    sLevel: "Уровень", sDisc: "Скидка", s90: "Куплено за 90 дней", sAcc: "Начислено всего",
+    sAcc: "Начислено всего", sPaid: "Выплачено вам",
     useTitle: "Что утепляем в доме", useHint: "Нажмите на цифру или кнопку ниже.",
     ask: "💬 Подробнее — у менеджера",
     ordersTitle: "📋 Мои заказы", ordersHint: "Заказы на вашу карту оформляет менеджер. Список обновляется при открытии меню бота.",
@@ -267,13 +282,12 @@ const T = {
 
 // Данные приходят от бота в адресе: #d=<base64url JSON>. Без них — демо для проверки в браузере.
 const DEMO = {
-  l: "uz", n: "Mansur", c: "TS1001-4827", q: "https://t.me/thermosystemsuz_bot?start=card_TS1001-4827",
-  m: "sales_thermoplus", lv: "Hamkor", d: 5,
-  bn: { lv: "Hamkor", d: 5, cb: 1, m90: 0, due: 0, acc: 0, next: "«Kumush» darajasigacha 50 m³ qoldi." },
-  u: [["🏢", "Ventfasad", "osma fasad ostiga, shamoldan himoya bilan", []], ["🧱", "Ho'l fasad", "to'r ustidan shtukaturka ostiga", []],
-      ["🏠", "Tom (krovlya)", "tekis tom, pastki va ustki qatlam", []], ["🟫", "Pol", "styajka ostiga, yuk ko'taradigan", []],
-      ["🚪", "Ichki devorlar va karkas", "yuksiz, issiqlik va tovush izolyatsiyasi", []], ["🔧", "Universal", "mansarda, oraliq yopma, texnik izolyatsiya", []]],
-  o: [[3, "15.10.2026", "THERMO VENT PRO", 80, 25.2, 19733112, "confirmed", 0]],
+  l: "uz", n: "Mansur", c: "TS1001-4827", q: "https://t.me/thermosystemsuz_bot?start=card_TS1001-4827", m: "sales_thermoplus",
+  bn: { due: 330000, acc: 330000, paid: 0, cnt: 1 },
+  u: [["🏢", "Ventfasad", "osma fasad ostiga", []], ["🧱", "Ho'l fasad", "shtukaturka ostiga", []], ["🏠", "Tom", "tekis tom", []],
+      ["🟫", "Pol", "styajka ostiga", []], ["🚪", "Ichki devorlar", "yuksiz", []], ["🔧", "Universal", "mansarda", []]],
+  o: [[3, "15.10.2026", "THERMO VENT PRO 80 мм, 25 м³", 23000000, "paid", 230000]],
+  r: [[1, "15.10.2026", "paid", 100000]],
 };
 
 function readData() {
@@ -316,14 +330,13 @@ tabs.forEach(b => {
 
 // ---------- 💳 карта ----------
 const bn = D.bn || {};
-$("cLevel").textContent = `${bn.lv || D.lv || ""} · −${bn.d ?? D.d ?? 0}%`;
+$("cLevel").textContent = "💳";
 $("cBal").textContent = `${fmt(bn.due)} ${tr("sum")}`;
 $("cCode").textContent = D.c || "—";
 $("cName").textContent = D.n || "";
-$("cCb").textContent = `${bn.cb || 0}%`;
-[[tr("sLevel"), bn.lv || "—"], [tr("sDisc"), `${bn.d ?? 0}%`], [tr("s90"), `${fmt(bn.m90)} m³`], [tr("sAcc"), `${fmt(bn.acc)} ${tr("sum")}`]]
+$("cCb").textContent = String(bn.cnt || 0);
+[[tr("sAcc"), `${fmt(bn.acc)} ${tr("sum")}`], [tr("sPaid"), `${fmt(bn.paid)} ${tr("sum")}`]]
   .forEach(([k, v]) => { const d = el("div"); d.append(el("small", "", k), el("b", "", v)); $("stats").appendChild(d); });
-$("next").textContent = bn.next || "";
 try {
   const qr = qrcode(0, "M");
   qr.addData(D.q || D.c || "");
@@ -365,14 +378,30 @@ $("askBtn").onclick = () => {
 // ---------- 📋 мои заказы ----------
 const orders = D.o || [];
 if (!orders.length) $("orders").appendChild(el("div", "empty", tr("noOrders")));
-orders.forEach(([no, date, name, thk, vol, total, st, bonus]) => {
+orders.forEach(([no, date, item, total, st, cb]) => {
   const d = el("div", "order");
   const top = el("div", "top");
   const badge = el("span", "badge b-" + st, T[L].st[st] || st);
   top.append(el("b", "", `№${no} · ${date}`), badge);
-  d.append(top, el("div", "", `${name}, ${thk} mm · ${fmt(vol)} m³`),
-    el("div", "hint", (total ? `${fmt(total)} ${tr("sum")}` : tr("byManager")) + (bonus ? ` · bonus +${fmt(bonus)} ${tr("sum")}` : "")));
+  d.append(top, el("div", "", item),
+    el("div", "hint", (total ? `${fmt(total)} ${tr("sum")}` : tr("byManager")) + (cb ? ` · 🎁 ${fmt(cb)} ${tr("sum")}` : "")));
   $("orders").appendChild(d);
+});
+
+// ---------- 📸 фотоотчёты ----------
+const reps = D.r || [];
+if (!reps.length) $("reports").appendChild(el("div", "empty", tr("noReports")));
+reps.forEach(([no, date, st, cb]) => {
+  const d = el("div", "order");
+  const top = el("div", "top");
+  top.append(el("b", "", `№${no} · ${date}`), el("span", "badge b-" + st, T[L].rst[st] || st));
+  d.append(top);
+  if (cb) d.append(el("div", "hint", `🎁 +${fmt(cb)} ${tr("sum")}`));
+  $("reports").appendChild(d);
+});
+// «Фотоотчёт»: бот попросит фото и геолокацию прямо в чате
+document.querySelectorAll(".ask.report").forEach(b => b.onclick = () => {
+  if (IN_TG) tg.sendData(JSON.stringify({ a: "report" }));
 });
 
 // ---------- 🛒 заказ — только через менеджера ----------

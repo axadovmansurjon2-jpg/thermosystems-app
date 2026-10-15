@@ -5,6 +5,7 @@
 <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, viewport-fit=cover">
 <title>ThermoSystems</title>
 <script src="https://telegram.org/js/telegram-web-app.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/qrcode-generator@1.4.4/qrcode.js"></script>
 <style>
   :root {
     --bg: var(--tg-theme-bg-color, #ffffff);
@@ -19,60 +20,57 @@
   * { box-sizing: border-box; -webkit-tap-highlight-color: transparent; }
   html, body { margin: 0; background: var(--bg2); color: var(--text);
     font: 16px/1.4 -apple-system, system-ui, "Segoe UI", Roboto, sans-serif; }
-  .wrap { max-width: 560px; margin: 0 auto; padding: 12px 16px 120px; }
+  .wrap { max-width: 560px; margin: 0 auto; padding: 12px 16px 110px; }
   header { display: flex; align-items: center; gap: 12px; margin: 4px 0 12px; }
   .logo { width: 44px; height: 44px; border-radius: 12px; background: var(--accent); color: var(--accent-text);
     display: grid; place-items: center; font-weight: 800; font-size: 18px; flex: none; }
   header b { display: block; font-size: 18px; }
   header small { color: var(--hint); }
-  .chip-level { margin-left: auto; background: var(--bg); border: 1px solid var(--line); border-radius: 999px;
-    padding: 4px 10px; font-size: 13px; white-space: nowrap; }
-  .tabs { display: grid; grid-template-columns: 1fr 1fr; gap: 6px; background: var(--bg); padding: 4px;
+  .tabs { display: grid; grid-template-columns: repeat(3, 1fr); gap: 4px; background: var(--bg); padding: 4px;
     border-radius: 14px; margin-bottom: 14px; }
-  .tabs button { border: 0; background: transparent; color: var(--text); font: inherit; font-weight: 600;
-    padding: 12px 6px; border-radius: 11px; cursor: pointer; }
+  .tabs button { border: 0; background: transparent; color: var(--text); font: inherit; font-weight: 600; font-size: 13px;
+    padding: 11px 2px; border-radius: 11px; cursor: pointer; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
   .tabs button.on { background: var(--accent); color: var(--accent-text); }
   .card { background: var(--bg); border-radius: 16px; padding: 14px; margin-bottom: 12px; }
-  h2 { font-size: 17px; margin: 0 0 10px; display: flex; align-items: center; gap: 8px; }
-  .num { width: 26px; height: 26px; border-radius: 50%; background: var(--accent); color: var(--accent-text);
-    display: inline-grid; place-items: center; font-size: 14px; flex: none; }
-  .done .num { background: var(--ok); }
-  .prod { display: flex; align-items: center; gap: 10px; width: 100%; text-align: left; border: 2px solid var(--line);
-    background: var(--bg); color: var(--text); border-radius: 12px; padding: 12px; margin-bottom: 8px; font: inherit; cursor: pointer; }
-  .prod.on { border-color: var(--accent); }
-  .prod .nm { font-weight: 700; }
-  .prod .sub { color: var(--hint); font-size: 14px; }
-  .prod .pr { margin-left: auto; text-align: right; font-weight: 600; font-size: 14px; white-space: nowrap; }
-  .link { background: none; border: 0; color: var(--accent); font: inherit; padding: 4px 0; cursor: pointer; }
-  .chips { display: grid; grid-template-columns: repeat(auto-fit, minmax(56px, 1fr)); gap: 8px; }
-  #dateChips { grid-template-columns: 1fr 1fr; }
-  .chips button { border: 2px solid var(--line); background: var(--bg); color: var(--text);
-    border-radius: 12px; padding: 12px 8px; font: inherit; font-weight: 700; cursor: pointer; }
-  .chips button.on { border-color: var(--accent); background: var(--accent); color: var(--accent-text); }
-  .seg { display: grid; grid-template-columns: 1fr 1fr; gap: 8px; margin-bottom: 10px; }
-  .seg button { border: 2px solid var(--line); background: var(--bg); color: var(--text); border-radius: 12px;
-    padding: 10px; font: inherit; cursor: pointer; }
-  .seg button.on { border-color: var(--accent); font-weight: 700; }
-  .field { position: relative; }
-  input, textarea { width: 100%; border: 2px solid var(--line); background: var(--bg); color: var(--text);
-    border-radius: 12px; padding: 14px; font: inherit; font-size: 20px; outline: none; }
-  textarea { font-size: 16px; min-height: 76px; resize: vertical; }
-  input:focus, textarea:focus { border-color: var(--accent); }
-  .unit { position: absolute; right: 14px; top: 50%; transform: translateY(-50%); color: var(--hint); font-size: 18px; pointer-events: none; }
-  .hint { color: var(--hint); font-size: 14px; margin-top: 6px; }
-  .result { display: grid; grid-template-columns: 1fr 1fr; gap: 8px; }
-  .result div { background: var(--bg2); border-radius: 12px; padding: 10px; }
-  .result small { display: block; color: var(--hint); font-size: 13px; }
-  .result b { font-size: 18px; }
-  .result .wide { grid-column: 1 / -1; }
-  .send { width: 100%; border: 0; border-radius: 14px; padding: 16px; font: inherit; font-weight: 700; font-size: 17px;
-    background: var(--accent); color: var(--accent-text); cursor: pointer; }
-  .send:disabled { opacity: .45; }
-  .err { color: var(--bad); font-size: 14px; margin-top: 8px; min-height: 1em; }
-  .bonus { display: grid; grid-template-columns: 1fr 1fr; gap: 8px; }
-  .bonus div { background: var(--bg2); border-radius: 12px; padding: 10px; }
-  .bonus small { display: block; color: var(--hint); font-size: 13px; }
-  .bonus b { font-size: 18px; }
+  h2 { font-size: 17px; margin: 0 0 10px; }
+  .hint { color: var(--hint); font-size: 14px; }
+
+  /* ---- карта мастера ---- */
+  .loyal { position: relative; overflow: hidden; border-radius: 20px; padding: 18px; color: #fff; margin-bottom: 12px;
+    background: linear-gradient(135deg, #0f3d7a 0%, #1f6fd1 55%, #f08a24 140%); box-shadow: 0 8px 24px rgba(15,61,122,.25); }
+  .loyal::after { content: ""; position: absolute; right: -40px; top: -40px; width: 160px; height: 160px; border-radius: 50%;
+    background: rgba(255,255,255,.10); }
+  .loyal .brand { font-weight: 800; letter-spacing: .5px; }
+  .loyal .lvl { position: absolute; right: 18px; top: 18px; background: rgba(255,255,255,.18); border-radius: 999px;
+    padding: 3px 10px; font-size: 13px; font-weight: 600; z-index: 1; }
+  .loyal .bal small { display: block; opacity: .8; font-size: 13px; margin-top: 18px; }
+  .loyal .bal b { font-size: 30px; letter-spacing: .3px; }
+  .loyal .row { display: flex; justify-content: space-between; align-items: flex-end; margin-top: 16px; gap: 10px; }
+  .loyal .code { font: 700 20px/1.2 ui-monospace, "SF Mono", Consolas, monospace; letter-spacing: 1.5px; }
+  .loyal .nm { opacity: .9; font-size: 14px; margin-top: 2px; }
+  .loyal .cb { text-align: right; font-size: 13px; opacity: .9; }
+  .loyal .cb b { display: block; font-size: 20px; }
+  .qrbox { display: flex; gap: 14px; align-items: center; }
+  .qr { width: 132px; height: 132px; flex: none; background: #fff; border-radius: 12px; padding: 8px; display: grid; place-items: center; }
+  .qr img, .qr svg { width: 100%; height: 100%; image-rendering: pixelated; }
+  .copy { margin-top: 8px; border: 1px solid var(--line); background: var(--bg2); color: var(--text); border-radius: 10px;
+    padding: 8px 12px; font: inherit; font-size: 14px; cursor: pointer; }
+  .stats { display: grid; grid-template-columns: 1fr 1fr; gap: 8px; }
+  .stats div { background: var(--bg2); border-radius: 12px; padding: 10px; }
+  .stats small { display: block; color: var(--hint); font-size: 13px; }
+  .stats b { font-size: 17px; }
+
+  /* ---- где какой товар (картинка-подсказка) ---- */
+  .use { display: grid; grid-template-columns: 52px 1fr; gap: 12px; padding: 12px 0; border-top: 1px solid var(--line); }
+  .use:first-of-type { border-top: 0; padding-top: 2px; }
+  .ico { width: 52px; height: 52px; border-radius: 14px; background: var(--bg2); display: grid; place-items: center; font-size: 28px; }
+  .use b { display: block; font-size: 16px; }
+  .use .hint { margin: 1px 0 8px; }
+  .pills { display: flex; flex-wrap: wrap; gap: 6px; }
+  .pill { background: var(--bg2); border-radius: 999px; padding: 4px 10px; font-size: 13px; font-weight: 600; white-space: nowrap; }
+  .pill i { font-style: normal; color: var(--hint); font-weight: 500; }
+
+  /* ---- заказы ---- */
   .order { border-top: 1px solid var(--line); padding: 12px 0; }
   .order:first-of-type { border-top: 0; padding-top: 0; }
   .order .top { display: flex; justify-content: space-between; gap: 8px; }
@@ -82,6 +80,11 @@
   .b-paid { background: rgba(31,157,85,.15); color: var(--ok); }
   .b-cancelled { background: rgba(214,69,69,.13); color: var(--bad); }
   .empty { color: var(--hint); text-align: center; padding: 18px 0; }
+
+  .cta { position: fixed; left: 0; right: 0; bottom: 0; padding: 10px 16px calc(12px + env(safe-area-inset-bottom));
+    background: linear-gradient(to top, var(--bg2) 70%, transparent); }
+  .cta button { display: block; width: 100%; max-width: 528px; margin: 0 auto; border: 0; border-radius: 14px; padding: 16px;
+    font: inherit; font-weight: 700; font-size: 17px; background: var(--accent); color: var(--accent-text); cursor: pointer; }
   .hidden { display: none !important; }
 </style>
 </head>
@@ -90,118 +93,100 @@
   <header>
     <div class="logo">TS</div>
     <div><b>ThermoSystems</b><small id="hello"></small></div>
-    <span class="chip-level" id="level"></span>
   </header>
 
   <div class="tabs">
-    <button id="tabOrder" class="on"></button>
-    <button id="tabMine"></button>
+    <button data-tab="card" class="on"></button>
+    <button data-tab="use"></button>
+    <button data-tab="mine"></button>
   </div>
 
-  <!-- ===== Новый заказ ===== -->
-  <section id="pageOrder">
-    <div class="card" id="stepProd">
-      <h2><span class="num">1</span><span data-t="s1"></span></h2>
-      <div id="prodList"></div>
-      <button class="link hidden" id="prodChange" data-t="change"></button>
-    </div>
-
-    <div class="card" id="stepThk">
-      <h2><span class="num">2</span><span data-t="s2"></span></h2>
-      <div class="chips" id="thkChips"></div>
-    </div>
-
-    <div class="card" id="stepQty">
-      <h2><span class="num">3</span><span data-t="s3"></span></h2>
-      <div class="seg">
-        <button id="modeArea" class="on" data-t="byArea"></button>
-        <button id="modeVol" data-t="byVol"></button>
+  <!-- ===== 💳 Карта ===== -->
+  <section id="page-card">
+    <div class="loyal">
+      <div class="brand">THERMOSYSTEMS</div>
+      <span class="lvl" id="cLevel"></span>
+      <div class="bal"><small data-t="balance"></small><b id="cBal"></b></div>
+      <div class="row">
+        <div><div class="code" id="cCode"></div><div class="nm" id="cName"></div></div>
+        <div class="cb"><span data-t="cashback"></span><b id="cCb"></b></div>
       </div>
-      <div class="field">
-        <input id="qty" type="text" inputmode="decimal" autocomplete="off" placeholder="0">
-        <span class="unit" id="qtyUnit">m²</span>
+    </div>
+    <div class="card">
+      <div class="qrbox">
+        <div class="qr" id="qr"></div>
+        <div>
+          <b data-t="qrTitle"></b>
+          <div class="hint" data-t="qrHint" style="margin-top:4px"></div>
+          <button class="copy" id="copyBtn" data-t="copy"></button>
+        </div>
       </div>
-      <div class="hint" id="qtyHint"></div>
-      <div class="result hidden" id="result" style="margin-top:12px"></div>
     </div>
-
-    <div class="card" id="stepAddr">
-      <h2><span class="num">4</span><span data-t="s4"></span></h2>
-      <textarea id="addr" maxlength="300"></textarea>
-      <div class="hint" data-t="addrHint"></div>
+    <div class="card">
+      <div class="stats" id="stats"></div>
+      <div class="hint" id="next" style="margin-top:10px"></div>
     </div>
-
-    <div class="card" id="stepDate">
-      <h2><span class="num">5</span><span data-t="s5"></span></h2>
-      <div class="chips" id="dateChips"></div>
-      <input id="dateOther" class="hidden" type="date" style="margin-top:10px; font-size:18px">
-    </div>
-
-    <button class="send" id="sendBtn" disabled></button>
-    <div class="err" id="err"></div>
   </section>
 
-  <!-- ===== Мои заказы ===== -->
-  <section id="pageMine" class="hidden">
+  <!-- ===== 🧱 Где какой товар ===== -->
+  <section id="page-use" class="hidden">
     <div class="card">
-      <h2>🎁 <span data-t="bonusTitle"></span></h2>
-      <div class="bonus" id="bonus"></div>
-      <div class="hint" id="bonusNext" style="margin-top:10px"></div>
+      <h2 data-t="useTitle"></h2>
+      <div class="hint" data-t="useHint" style="margin:-4px 0 10px"></div>
+      <div id="usage"></div>
     </div>
+  </section>
+
+  <!-- ===== 📋 Мои заказы ===== -->
+  <section id="page-mine" class="hidden">
     <div class="card">
-      <h2>📋 <span data-t="ordersTitle"></span></h2>
+      <h2 data-t="ordersTitle"></h2>
       <div id="orders"></div>
-      <div class="hint" data-t="ordersHint"></div>
+      <div class="hint" data-t="ordersHint" style="margin-top:8px"></div>
     </div>
   </section>
 </div>
 
+<div class="cta"><button id="orderBtn"></button></div>
+
 <script>
 const T = {
   uz: {
-    hello: "Salom, {n}!", tabOrder: "🛒 Buyurtma", tabMine: "📋 Buyurtmalarim",
-    s1: "Mahsulotni tanlang", s2: "Qalinlik, mm", s3: "Qancha kerak?", s4: "Obyekt manzili", s5: "Qachon kerak?",
-    change: "↺ Boshqa mahsulot tanlash", byArea: "Maydon, m²", byVol: "Hajm, m³",
-    hintArea: "Devor yoki tom maydonini yozing — hajmni o'zimiz hisoblaymiz ({r}% zaxira bilan)",
-    hintVol: "Kerakli hajmni m³ da yozing",
-    rVol: "Hajm", rPlates: "Plitalar 1200×600", rPrice: "Narx", rTotal: "Summa", rBonus: "Bonusingiz",
-    pcs: "dona", perM3: "so'm/m³", sum: "so'm", byManager: "menejer aytadi",
-    addrHint: "Tuman, ko'cha, mo'ljal. Lokatsiyani keyin chatga yuborishingiz mumkin.",
-    today: "Bugun", tomorrow: "Ertaga", after: "Indinga", other: "📅 Boshqa kun",
-    send: "✅ Buyurtma berish", sendV: "✅ Buyurtma berish · {v} m³",
-    eProd: "Mahsulotni tanlang", eThk: "Qalinlikni tanlang", eQty: "Miqdorni yozing", eAddr: "Manzilni yozing", eDate: "Sanani tanlang",
-    bonusTitle: "Mening bonusim", bLevel: "Daraja", bDisc: "Chegirma", b90: "90 kunda", bDue: "To'lanadi",
-    ordersTitle: "Buyurtmalarim", ordersHint: "Ro'yxat bot menyusi ochilganda yangilanadi.",
-    noOrders: "Hali buyurtma yo'q. «🛒 Buyurtma» bo'limida bering.",
+    hello: "Salom, {n}!", tab_card: "💳 Kartam", tab_use: "🧱 Mahsulotlar", tab_mine: "📋 Buyurtmalar",
+    balance: "Kartadagi bonus", cashback: "Keshbek", sum: "so'm",
+    qrTitle: "Karta raqami va QR-kod", qrHint: "Buyurtma berishda menejerga shu kodni ko'rsating — buyurtma sizning tarixingizga va kartangizga yoziladi.",
+    copy: "📋 Raqamni nusxalash", copied: "✅ Nusxalandi",
+    sLevel: "Daraja", sDisc: "Chegirma", s90: "90 kunda xarid", sAcc: "Jami hisoblangan",
+    useTitle: "Qayerga qaysi mahsulot", useHint: "Tanlashda yordam uchun. Aniq tavsiyani menejer beradi.",
+    ordersTitle: "📋 Buyurtmalarim", ordersHint: "Buyurtmalarni menejer kartangizga yozadi. Ro'yxat bot menyusi ochilganda yangilanadi.",
+    noOrders: "Hali buyurtma yo'q. Pastdagi tugma orqali menejerga yozing.",
+    byManager: "menejer aytadi",
+    order: "🛒 Buyurtma berish — menejer orqali",
     st: { new: "🕐 Yangi", confirmed: "👍 Tasdiqlangan", paid: "✅ To'langan", cancelled: "❌ Bekor qilingan" },
-    sent: "Buyurtma yuborildi ✅",
   },
   ru: {
-    hello: "Здравствуйте, {n}!", tabOrder: "🛒 Заказ", tabMine: "📋 Мои заказы",
-    s1: "Выберите товар", s2: "Толщина, мм", s3: "Сколько нужно?", s4: "Адрес объекта", s5: "Когда нужно?",
-    change: "↺ Выбрать другой товар", byArea: "Площадь, м²", byVol: "Объём, м³",
-    hintArea: "Укажите площадь стены или кровли — объём посчитаем сами (с запасом {r}%)",
-    hintVol: "Укажите нужный объём в м³",
-    rVol: "Объём", rPlates: "Плит 1200×600", rPrice: "Цена", rTotal: "Сумма", rBonus: "Ваш бонус",
-    pcs: "шт", perM3: "сум/м³", sum: "сум", byManager: "уточнит менеджер",
-    addrHint: "Район, улица, ориентир. Геолокацию можно потом отправить в чат.",
-    today: "Сегодня", tomorrow: "Завтра", after: "Послезавтра", other: "📅 Другой день",
-    send: "✅ Оформить заказ", sendV: "✅ Оформить заказ · {v} м³",
-    eProd: "Выберите товар", eThk: "Выберите толщину", eQty: "Укажите количество", eAddr: "Укажите адрес", eDate: "Выберите дату",
-    bonusTitle: "Мой бонус", bLevel: "Уровень", bDisc: "Скидка", b90: "За 90 дней", bDue: "К выплате",
-    ordersTitle: "Мои заказы", ordersHint: "Список обновляется, когда открывается меню бота.",
-    noOrders: "Заказов пока нет. Оформите в разделе «🛒 Заказ».",
+    hello: "Здравствуйте, {n}!", tab_card: "💳 Карта", tab_use: "🧱 Товары", tab_mine: "📋 Заказы",
+    balance: "Бонус на карте", cashback: "Кешбэк", sum: "сум",
+    qrTitle: "Номер карты и QR-код", qrHint: "При заказе покажите этот код менеджеру — заказ попадёт в вашу историю и на карту.",
+    copy: "📋 Скопировать номер", copied: "✅ Скопировано",
+    sLevel: "Уровень", sDisc: "Скидка", s90: "Куплено за 90 дней", sAcc: "Начислено всего",
+    useTitle: "Где какой товар", useHint: "Подсказка для выбора. Точную рекомендацию даст менеджер.",
+    ordersTitle: "📋 Мои заказы", ordersHint: "Заказы на вашу карту оформляет менеджер. Список обновляется при открытии меню бота.",
+    noOrders: "Заказов пока нет. Напишите менеджеру кнопкой внизу.",
+    byManager: "уточнит менеджер",
+    order: "🛒 Заказать — через менеджера",
     st: { new: "🕐 Новый", confirmed: "👍 Подтверждён", paid: "✅ Оплачен", cancelled: "❌ Отменён" },
-    sent: "Заказ отправлен ✅",
   },
 };
 
 // Данные приходят от бота в адресе: #d=<base64url JSON>. Без них — демо для проверки в браузере.
 const DEMO = {
-  l: "uz", n: "Mansur", lv: "Hamkor", d: 5, r: 5, pl: [1200, 600], t: [50, 80, 100, 150, 200],
-  p: [["THERMO LITE", 30, 390000], ["THERMO VENT PRO", 80, 842000], ["THERMO FACADE", 100, 1052000], ["THERMO ROOF L", 100, 0]],
-  bn: { m90: 0, due: 0, next: "«Kumush» darajasigacha 50 m³ qoldi." },
-  o: [[2, "15.10.2026", "THERMO VENT PRO", 80, 12.5, 10000000, "confirmed", 0], [1, "10.10.2026", "THERMO FACADE", 100, 3, null, "paid", 0]],
+  l: "uz", n: "Mansur", c: "TS1001-4827", q: "https://t.me/thermosystemsuz_bot?start=card_TS1001-4827",
+  m: "sales_thermoplus", lv: "Hamkor", d: 5,
+  bn: { lv: "Hamkor", d: 5, cb: 1, m90: 0, due: 0, acc: 0, next: "«Kumush» darajasigacha 50 m³ qoldi." },
+  u: [["🏢", "Ventfasad", "osma fasad ostiga", [["THERMO VENT FACADE", 70], ["THERMO VENT PRO", 80]]],
+      ["🏠", "Tom (krovlya)", "tekis tom", [["THERMO ROOF L", 100], ["THERMO ROOF U", 170]]]],
+  o: [[3, "15.10.2026", "THERMO VENT PRO", 80, 25.2, 19733112, "confirmed", 0]],
 };
 
 function readData() {
@@ -225,237 +210,85 @@ const fmt = n => {
   const [i, f] = String(n).split(".");
   return i.replace(/\B(?=(\d{3})+(?!\d))/g, " ") + (f ? "." + f : "");
 };
-const clientPrice = base => base ? Math.round(base * (1 - (D.d || 0) / 100)) : 0;
+const el = (tag, cls, text) => { const e = document.createElement(tag); if (cls) e.className = cls; if (text != null) e.textContent = text; return e; };
 
-const S = { prod: null, thk: null, mode: "area", qty: 0, date: null };
-
-// ---------- шапка, вкладки ----------
 document.documentElement.lang = L;
-document.querySelectorAll("[data-t]").forEach(el => el.textContent = tr(el.dataset.t));
+document.querySelectorAll("[data-t]").forEach(e => e.textContent = tr(e.dataset.t));
 $("hello").textContent = tr("hello", { n: D.n || "" });
-$("level").textContent = `${D.lv || ""}${D.d ? " · −" + D.d + "%" : ""}`;
-$("tabOrder").textContent = tr("tabOrder");
-$("tabMine").textContent = tr("tabMine");
-function showTab(mine) {
-  $("tabOrder").classList.toggle("on", !mine);
-  $("tabMine").classList.toggle("on", mine);
-  $("pageOrder").classList.toggle("hidden", mine);
-  $("pageMine").classList.toggle("hidden", !mine);
-  syncMainButton();
-}
-$("tabOrder").onclick = () => showTab(false);
-$("tabMine").onclick = () => showTab(true);
 
-// ---------- 1. товар (клиент выбирает сам из всего каталога) ----------
-function renderProducts() {
-  const list = $("prodList");
-  list.innerHTML = "";
-  D.p.forEach((p, i) => {
-    if (S.prod !== null && S.prod !== i) return;
-    const price = clientPrice(p[2]);
-    const b = document.createElement("button");
-    b.className = "prod" + (S.prod === i ? " on" : "");
-    b.innerHTML = `<div><div class="nm"></div><div class="sub"></div></div><div class="pr"></div>`;
-    b.querySelector(".nm").textContent = p[0];
-    b.querySelector(".sub").textContent = `${p[1]} kg/m³`;
-    b.querySelector(".pr").textContent = price ? `${fmt(price)} ${tr("perM3")}` : tr("byManager");
-    b.onclick = () => { S.prod = S.prod === i ? null : i; renderProducts(); update(); };
-    list.appendChild(b);
-  });
-  $("prodChange").classList.toggle("hidden", S.prod === null);
-  $("stepProd").classList.toggle("done", S.prod !== null);
-}
-$("prodChange").onclick = () => { S.prod = null; renderProducts(); update(); };
-
-// ---------- 2. толщина ----------
-(D.t || []).forEach(mm => {
-  const b = document.createElement("button");
-  b.textContent = mm;
+// ---------- вкладки ----------
+const tabs = [...document.querySelectorAll(".tabs button")];
+tabs.forEach(b => {
+  b.textContent = tr("tab_" + b.dataset.tab);
   b.onclick = () => {
-    S.thk = mm;
-    [...$("thkChips").children].forEach(c => c.classList.toggle("on", c === b));
-    update();
+    tabs.forEach(x => x.classList.toggle("on", x === b));
+    ["card", "use", "mine"].forEach(p => $("page-" + p).classList.toggle("hidden", p !== b.dataset.tab));
+    window.scrollTo(0, 0);
   };
-  $("thkChips").appendChild(b);
 });
 
-// ---------- 3. количество ----------
-function setMode(m) {
-  S.mode = m;
-  $("modeArea").classList.toggle("on", m === "area");
-  $("modeVol").classList.toggle("on", m === "vol");
-  $("qtyUnit").textContent = m === "area" ? "m²" : "m³";
-  $("qtyHint").textContent = m === "area" ? tr("hintArea", { r: D.r || 0 }) : tr("hintVol");
-  update();
-}
-$("modeArea").onclick = () => setMode("area");
-$("modeVol").onclick = () => setMode("vol");
-$("qty").addEventListener("input", e => {
-  const v = parseFloat(e.target.value.replace(",", ".").replace(/\s/g, ""));
-  S.qty = v > 0 && v < 100000 ? v : 0;
-  update();
-});
+// ---------- 💳 карта ----------
+const bn = D.bn || {};
+$("cLevel").textContent = `${bn.lv || D.lv || ""} · −${bn.d ?? D.d ?? 0}%`;
+$("cBal").textContent = `${fmt(bn.due)} ${tr("sum")}`;
+$("cCode").textContent = D.c || "—";
+$("cName").textContent = D.n || "";
+$("cCb").textContent = `${bn.cb || 0}%`;
+[[tr("sLevel"), bn.lv || "—"], [tr("sDisc"), `${bn.d ?? 0}%`], [tr("s90"), `${fmt(bn.m90)} m³`], [tr("sAcc"), `${fmt(bn.acc)} ${tr("sum")}`]]
+  .forEach(([k, v]) => { const d = el("div"); d.append(el("small", "", k), el("b", "", v)); $("stats").appendChild(d); });
+$("next").textContent = bn.next || "";
+try {
+  const qr = qrcode(0, "M");
+  qr.addData(D.q || D.c || "");
+  qr.make();
+  $("qr").innerHTML = qr.createSvgTag({ cellSize: 4, margin: 0, scalable: true });
+} catch (e) { $("qr").textContent = D.c || ""; }
+$("copyBtn").onclick = async () => {
+  try { await navigator.clipboard.writeText(D.c || ""); $("copyBtn").textContent = tr("copied"); } catch (e) {}
+};
 
-function volume() {
-  if (!S.qty) return 0;
-  if (S.mode === "vol") return Math.round(S.qty * 100) / 100;
-  if (!S.thk) return 0;
-  return Math.round(S.qty * S.thk / 1000 * (1 + (D.r || 0) / 100) * 100) / 100;
-}
-function plates(v) {
-  const [w, h] = D.pl || [1200, 600];
-  const one = w / 1000 * h / 1000 * (S.thk || 0) / 1000;
-  return one ? Math.ceil(v / one - 1e-9) : 0;
-}
-
-// ---------- 5. дата ----------
-function dayStr(add) {
-  const d = new Date(); d.setDate(d.getDate() + add);
-  return String(d.getDate()).padStart(2, "0") + "." + String(d.getMonth() + 1).padStart(2, "0");
-}
-[["today", 0], ["tomorrow", 1], ["after", 2], ["other", null]].forEach(([k, add]) => {
-  const b = document.createElement("button");
-  b.textContent = add === null ? tr(k) : `${tr(k)} ${dayStr(add)}`;
-  b.onclick = () => {
-    [...$("dateChips").children].forEach(c => c.classList.toggle("on", c === b));
-    $("dateOther").classList.toggle("hidden", add !== null);
-    S.date = add === null ? otherDate() : dayStr(add);
-    update();
-  };
-  $("dateChips").appendChild(b);
-});
-function otherDate() {
-  const v = $("dateOther").value;
-  if (!v) return null;
-  const [y, m, d] = v.split("-");
-  return `${d}.${m}.${y}`;
-}
-$("dateOther").addEventListener("change", () => { S.date = otherDate(); update(); });
-$("addr").addEventListener("input", update);
-
-// ---------- расчёт и кнопка ----------
-function missing() {
-  if (S.prod === null) return "eProd";
-  if (!S.thk) return "eThk";
-  if (!volume()) return "eQty";
-  if ($("addr").value.trim().length < 3) return "eAddr";
-  if (!S.date) return "eDate";
-  return null;
-}
-
-function update() {
-  const v = volume();
-  const box = $("result");
-  if (S.prod !== null && S.thk && v) {
-    const price = clientPrice(D.p[S.prod][2]);
-    const cells = [
-      [tr("rVol"), `${fmt(v)} m³`],
-      [tr("rPlates"), `~${plates(v)} ${tr("pcs")}`],
-    ];
-    if (price) {
-      cells.push([tr("rPrice"), `${fmt(price)} ${tr("perM3")}`]);
-      cells.push([tr("rTotal"), `${fmt(price * v)} ${tr("sum")}`]);
-    } else {
-      cells.push([tr("rPrice"), tr("byManager"), true]);
-    }
-    box.innerHTML = "";
-    cells.forEach(([k, val, wide]) => {
-      const d = document.createElement("div");
-      if (wide) d.className = "wide";
-      d.innerHTML = "<small></small><b></b>";
-      d.querySelector("small").textContent = k;
-      d.querySelector("b").textContent = val;
-      box.appendChild(d);
-    });
-    box.classList.remove("hidden");
-  } else {
-    box.classList.add("hidden");
-  }
-  $("stepThk").classList.toggle("done", !!S.thk);
-  $("stepQty").classList.toggle("done", !!v);
-  $("stepAddr").classList.toggle("done", $("addr").value.trim().length >= 3);
-  $("stepDate").classList.toggle("done", !!S.date);
-  $("sendBtn").disabled = !!missing();
-  $("sendBtn").textContent = buttonText();
-  $("err").textContent = "";
-  syncMainButton();
-}
-
-// Текст кнопки подсказывает следующий шаг, пока заказ не заполнен
-function buttonText() {
-  const miss = missing();
-  return miss ? "👉 " + tr(miss) : tr("sendV", { v: fmt(volume()) });
-}
-
-function syncMainButton() {
-  if (!IN_TG) return;
-  const onOrder = !$("pageOrder").classList.contains("hidden");
-  if (!onOrder) { tg.MainButton.hide(); return; }
-  const ready = !missing();
-  tg.MainButton.setParams({
-    text: buttonText(), is_visible: true, is_active: ready,
-    color: ready ? (tg.themeParams.button_color || "#1f6fd1") : (tg.themeParams.hint_color || "#9aa3ad"),
-    text_color: "#ffffff",
+// ---------- 🧱 где какой товар ----------
+(D.u || []).forEach(([icon, name, hint, items]) => {
+  const row = el("div", "use");
+  row.appendChild(el("div", "ico", icon));
+  const body = el("div");
+  body.append(el("b", "", name), el("div", "hint", hint));
+  const pills = el("div", "pills");
+  items.forEach(([pn, dens]) => {
+    const p = el("span", "pill", pn.replace(/^THERMO\s+/, ""));
+    if (dens) { const i = el("i", "", ` ${dens} kg/m³`); p.appendChild(i); }
+    pills.appendChild(p);
   });
-}
+  body.appendChild(pills);
+  row.appendChild(body);
+  $("usage").appendChild(row);
+});
 
-function send() {
-  const miss = missing();
-  if (miss) { $("err").textContent = tr(miss); return; }
-  const payload = {
-    a: "order", p: D.p[S.prod][0], t: S.thk, v: volume(),
-    ad: $("addr").value.trim().slice(0, 300), dt: S.date,
-  };
+// ---------- 📋 мои заказы ----------
+const orders = D.o || [];
+if (!orders.length) $("orders").appendChild(el("div", "empty", tr("noOrders")));
+orders.forEach(([no, date, name, thk, vol, total, st, bonus]) => {
+  const d = el("div", "order");
+  const top = el("div", "top");
+  const badge = el("span", "badge b-" + st, T[L].st[st] || st);
+  top.append(el("b", "", `№${no} · ${date}`), badge);
+  d.append(top, el("div", "", `${name}, ${thk} mm · ${fmt(vol)} m³`),
+    el("div", "hint", (total ? `${fmt(total)} ${tr("sum")}` : tr("byManager")) + (bonus ? ` · bonus +${fmt(bonus)} ${tr("sum")}` : "")));
+  $("orders").appendChild(d);
+});
+
+// ---------- 🛒 заказ — только через менеджера ----------
+$("orderBtn").textContent = tr("order");
+$("orderBtn").onclick = () => {
   if (IN_TG) {
-    tg.sendData(JSON.stringify(payload));   // бот получит заказ, окно закроется само
-  } else {
-    alert(tr("sent") + "\n\n" + JSON.stringify(payload, null, 1));
+    // бот покажет контакт менеджера и передаст ему заявку с номером карты; окно закроется само
+    tg.sendData(JSON.stringify({ a: "request" }));
+  } else if (D.m) {
+    window.open("https://t.me/" + D.m, "_blank");
   }
-}
-$("sendBtn").onclick = send;
+};
 
-// ---------- мои заказы ----------
-function renderMine() {
-  const bn = D.bn || {};
-  const box = $("bonus");
-  [[tr("bLevel"), bn.lv || D.lv || "—"], [tr("bDisc"), `${bn.d ?? D.d ?? 0}%`], [tr("b90"), `${fmt(bn.m90)} m³`], [tr("bDue"), `${fmt(bn.due)} ${tr("sum")}`]]
-    .forEach(([k, v]) => {
-      const d = document.createElement("div");
-      d.innerHTML = "<small></small><b></b>";
-      d.querySelector("small").textContent = k;
-      d.querySelector("b").textContent = v;
-      box.appendChild(d);
-    });
-  $("bonusNext").textContent = bn.next || "";
-  const list = $("orders");
-  const orders = D.o || [];
-  if (!orders.length) { list.innerHTML = `<div class="empty"></div>`; list.firstChild.textContent = tr("noOrders"); return; }
-  orders.forEach(([no, date, name, thk, vol, total, st, bonus]) => {
-    const d = document.createElement("div");
-    d.className = "order";
-    d.innerHTML = `<div class="top"><b></b><span class="badge"></span></div><div class="it"></div><div class="hint"></div>`;
-    d.querySelector("b").textContent = `№${no} · ${date}`;
-    const badge = d.querySelector(".badge");
-    badge.textContent = T[L].st[st] || st;
-    badge.classList.add("b-" + st);
-    d.querySelector(".it").textContent = `${name}, ${thk} mm · ${fmt(vol)} m³`;
-    d.querySelector(".hint").textContent = (total ? `${fmt(total)} ${tr("sum")}` : tr("byManager")) +
-      (bonus ? ` · bonus ${fmt(bonus)} ${tr("sum")}` : "");
-    list.appendChild(d);
-  });
-}
-
-// ---------- старт ----------
-if (IN_TG) {
-  tg.ready();
-  tg.expand();
-  tg.MainButton.onClick(send);
-  $("sendBtn").classList.add("hidden");   // внутри Telegram — нижняя кнопка Telegram
-}
-renderProducts();
-setMode("area");
-renderMine();
-if (location.hash.includes("tab=mine")) showTab(true);
+if (IN_TG) { tg.ready(); tg.expand(); }
 </script>
 </body>
 </html>
